@@ -1,0 +1,70 @@
+(kun puhun kirjastosta, tarkoitan std::map)
+
+Elikkä;
+
+Openstreetmapin formaatissa määritellään ensin solmut. Solmuilla on paikka ja ID. Paikka on ilmaistu koordinaateilla (leveys ja pituuspiirit). Kaikki ID:t ovat uniikkeja.
+Sitten määritellään solmujen avulla tiet ja talot. Teiden tapauksessa annetaan lista solmuista, joiden kautta tie kulkee.
+Talot määritellään myös solmulistan avulla, jossa jokainen solmu on talon kulma - eli ne voi olla monikulmioita.
+
+Homma toimii seuraavasti:
+
+    1. Luodaan jokainen kartan solmu (class Node, node.hpp). Sillä on ID ja paikka, joihin pääsee käsiksi Node::ID ja Node::Location funktioiden avulla.
+    ID() palauttaa longin, Location() palauttaa pair<float,float>, missä ensimmäinen on leveyspiiri ja toinen pituuspiiri.
+    Solmut tallennetaan kirjastoon std::map<long, Node*> nodes_. Alkion avain on solmun ID ja arvo on osoitin solmuun.
+    Kirjastoon päästään käsiksi City::Nodes funktiolla
+
+    ESIM jos haluaa päästä käsiksi solmun leveyspiiriin, se tapahtuu esimerkiksi näin (olettaen että kaupungin osoittimen nimi on "city")
+        std::map<long, Node*> kaikki_solmut = city->Nodes()
+        Node* haluttu_solmu = kaikki_solmut[ solmun_ID ]
+        std::pair<float,float> koordinaatit = haluttu_solmu->Coordinates()
+        float leveyspiiri = koordinaatit.first
+
+    (tai yksinkertaisemmin  float leveyspiiri = city->Nodes()[solmun_id]->Coordinates().first
+
+
+    2. Luodaan tieverkko. Kaikkien teiden solmujen välille luodaan tie. Tiet ovat yksisuuntaisia - eli kahden solmun välille luodaan aina kaksi tietä.
+    Tie rakennetaan sen alku- ja loppusolmusta, joihin pääsee käsiksi Road::Source ja Road::Destination
+    Tiet tallennetaan vierekkäisyyslistaan std:map<Node*, std::list<Road*> > adjacencylist_     (( City::AdjList ))
+    Jokainen avain on solmu ja avaimen arvo on ne tiet, jotka alkavat kyseisestä solmusta.
+
+    Kaikki tiet tallennetaan myös muuttujaan std::set<Road*> roads_
+
+    Eli siis jos halutaan piirtää kaikki tiet, lähdetään iteroimaan
+
+    for( auto i : city->Roads() )
+         Node* lähtöpaikka = j->Source()     Haetaan tien lähtö ja loppusolmut
+         Node* määränpää = j->Destination()
+         lähtöpaikan_koordinaatit = lähtöpaikka->Coordinates()   Haetaan lähtö ja loppusolmujen koordinaatit
+         määränpään_koordinaatit = määränpää->Coordinates()      eli siis tie on näiden kahden pair<float,float> välillä
+
+    !!! HUOM !!! kahden solmun välillä on siis kaksi tietä, yksi kumpaankin suuntaan. Näiden vastakkaisten teiden koordinaatit ovat valitettavasti samat,
+    eli pitää siis keksiä tapa, jolla ne eivät mene päällekkäin guissa. !!! HUOM !!!
+            
+    
+    
+    3. Luodaan talot. Talot tallennetaan kirjastoon std::map<long, Building*> buildings_ , missä avain on talon ID ja Building* osoitin itse taloon.
+    Luokalla Building on lista std::list<long> corners, joka sisältää listan sen kulmien ID:stä. 
+    Eli pitää kaivaa ensin Buildingistä lista solmujen IDeistä, sitten hakea jokaista kulmaa vastaava solmu City::Nodesista ja sitten itse solmusta sen koordinaatit
+    Kulmat ovat järjestykssä, ja viimeisestä kulmasta mennään ensimmäiseen.
+    Jos siis halutaan jokaisen talon kaikki kulmat, tehdään
+
+    for(auto i : city->Buildings() )
+        talo = i.second
+        for( auto kulman_id : talo->Corners() )
+            koordinaatit = nodes_[kulman_id]
+            ;;
+
+    4. Simuloidaan. Roadit tietävät kuinka paljon jengiä niillä liikkuu, muuttuja std::map<Car*,int> on kirjasto autoista ja niiden matka-ajoista tiellä.
+    Sen saa ongittua funktiolla Road::Traffic. Tiellä matkustavien autojen määrä saadaan siis funktiolla Road::Traffic::size.
+    Eli jos halutaan käydä kaikki tiet läpi, ja kysyä niiltä paljon niissä on autoja:
+
+    for(auto i : city->Roads() )
+        int autojen_määrä = i->Traffic().size() 
+
+
+(Grafiikan kalibrointiin voi ehkä halutessaan käyttää City::Dim funktiota, joka palauttaa listan kartan reunojen sijainneista järjestyksessä minlat, minlon, maxlat, maxlon
+Huomionarvoista on myös se, että osa solmuista saattaa mennä tämän alueen ulkopuolelle ":D")
+
+Tien pituus ja tien maksimikapasiteetti on tällä hetkellä vakioita, niillä voi pelleillä road.cpp:ssä. 
+
+Verkon läpikulkualgoritmi on vielä kesken, tällä hetkellä autot osaa ajaa vain yhdellä tiellä. Jos haluaa testailla, test.cpp:ssä on kommenteissa tarkemmat ohjeet 

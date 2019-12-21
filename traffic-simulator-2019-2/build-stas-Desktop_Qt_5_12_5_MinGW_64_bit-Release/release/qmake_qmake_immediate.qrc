@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+<file alias="map1.osm">C:/Users/Omistaja/C++/traffic-simulator-2019-2/src/map1.osm</file>
+<file alias="map2.osm">C:/Users/Omistaja/C++/traffic-simulator-2019-2/src/map2.osm</file>
+<file alias="map7.osm">C:/Users/Omistaja/C++/traffic-simulator-2019-2/src/map7.osm</file>
+</qresource>
+</RCC>
