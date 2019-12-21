@@ -1,5 +1,4 @@
-# hello-world
-Testing repositories
+# Hello world
 
-I'm a second-year student of electrical engineering in Aalto, trying out Github for the first time.
-Adding a Basics of C programming course project, to be enhanced and developed further.
+I'm a third year student of electrical engineering in Aalto University, trying to learn Git.
+Adding school related projects for archiving and further development purposes.
