@@ -14,13 +14,13 @@ using namespace std;
 // Yksi looppaus, joka on ajanhetkenä riittävän pieni
 int City::Loop(int time) {
 
-    int are_paths = home_office_.size() + office_home_.size() + gym_home_.size() + home_gym_.size() + office_gym_.size() + gym_office_.size();
-    if(!are_paths) { return -1; }
+    //int are_paths = static_cast<int>(home_office_.size() + office_home_.size() + gym_home_.size() + home_gym_.size() + office_gym_.size() + gym_office_.size());
+    //if(are_paths == 0) { return -1; }
 
     //Keskeiset funktiot Loopin sisällä
-    are_paths = Create_cars(time);
-        if(!are_paths) { return -1; } 
-    Update_roads(time);   
+    //int are_paths = Create_cars(time); if(are_paths == 0) { return -1; }
+    Create_cars(time);
+    Update_roads(time);
     // Palauttaa kaikkien tiellä matkustavien määrän
     int total_drivers = 0;
     for(auto road : roads_){
@@ -36,14 +36,14 @@ int City::Loop(int time) {
 int City::Create_cars(int time)
 {   
     // Satunnaisuuden avulla luodaan ihmisten käyttäytyminen (esim. aamulla ihmiset menevät todennäköisemmin töihin kuin illalla)
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    unsigned seed = static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator (seed);
  
     // Kuvastaa monesko tunti menossa pyöristettynä alaspäin (esim 17, kello voisi olla 17:34) ottaen huomioon, että aikayksikkö on 10s
-    int current_hour = 	floor (time / (6*60));
+    size_t current_hour = 	static_cast<size_t>(((time / (6*60))));
 
     // Lambda kuvastaa ihmisten aktiivisuutta (esim. aamulla ihmiset liikkuvat todennäköisemmin kuin yöllä)
-    double current_lambda = lambdas[floor(current_hour)];
+    double current_lambda = lambdas[static_cast<size_t>(current_hour)];
     
     // Ajajien luonti on Poisson-jakautunut
     std::poisson_distribution<int> distribution (current_lambda);
@@ -55,10 +55,10 @@ int City::Create_cars(int time)
     for(int amount = 0; amount < i; amount++)
     {
 	// Valitse satunnaisesti, minkälainen polku on kyseessä. Tärkeää on ohjelman toimimisen kannalta tarkistaa, että polkuvektori ei ole tyhjä.
-	int path_type = -1;
+    int path_type = -1;
 	// Normitus auttaa käsittelemään jakaumaa oikein.	
 	double norm = 1;
-	int counter = 0;
+    size_t counter = 0;
     // :D
     int purkka = 0;	
 	// not_found_path_vector muuttuu todeksi kun on löydetty path-vektori, jossa on alkioita
@@ -69,7 +69,7 @@ int City::Create_cars(int time)
 		// While-loop loppuu, kun kaikki paitsi viimeinen alkio on tarkastettu
 		while ((path_type < 0 ) || (counter < 5)) {
 			std::bernoulli_distribution distribution(propotions_routes[current_hour][counter]/norm);
-			if (distribution(generator)) {path_type = counter; }
+            if (distribution(generator)) {path_type = static_cast<int>(counter); }
 			norm = norm - propotions_routes[current_hour][counter];
 			counter = counter + 1; 
 		}
@@ -125,22 +125,22 @@ bool City::Check_vector_size(int label){
 
 	switch(label) {
 	      case '0' : 
-		     if (home_office_.size()> 0) {not_empty = true;};
+             if (home_office_.size()> 0) {not_empty = true;}
 		 break;
 	      case '1' :
-   		     if (office_home_.size()> 0) {not_empty = true;};
+             if (office_home_.size()> 0) {not_empty = true;}
 		 break;
 	      case '2' :
-   		     if (home_gym_.size()> 0) {not_empty = true;};
+             if (home_gym_.size()> 0) {not_empty = true;}
 		 break;
 	      case '3' :
-   		    if (gym_home_.size()> 0) {not_empty = true;};
+            if (gym_home_.size()> 0) {not_empty = true;}
 		 break;
 	      case '4' :
-   		     if (office_gym_.size()> 0) {not_empty = true;};
+             if (office_gym_.size()> 0) {not_empty = true;}
 		 break;
 	      default :
-   		    if (gym_office_.size()> 0) {not_empty = true;};
+            if (gym_office_.size()> 0) {not_empty = true;}
 	
 	}
     
@@ -153,32 +153,32 @@ bool City::Check_vector_size(int label){
 list<long> City::Get_path(int path_type)
 {	
 	// Alustetaan arvot
-	int i = 0;
+    size_t i = 0;
 	auto l = gym_office_[0];
 
 	switch(path_type) {
 	      case '0' :
-		     i = rand() % home_office_.size();
+             i = static_cast<size_t>(rand()) % home_office_.size();
    		     l = home_office_[i];
 		 break;
 	      case '1' :
-		     i = rand() % office_home_.size();
+             i = static_cast<size_t>(rand()) % office_home_.size();
    		     l = office_home_[i];
 		 break;
 	      case '2' :
-		     i = rand() % home_gym_.size();
+             i = static_cast<size_t>(rand()) % home_gym_.size();
    		     l = home_gym_[i];
 		 break;
 	      case '3' :
-		     i = rand() % gym_home_.size();
+             i = static_cast<size_t>(rand()) % gym_home_.size();
    		     l = gym_home_[i];
 		 break;
 	      case '4' :
-		     i = rand() % office_gym_.size();
+             i = static_cast<size_t>(rand()) % office_gym_.size();
    		     l = office_gym_[i];
 		 break;
 	      default :
-		     i = rand() % gym_office_.size();
+             i = static_cast<size_t>(rand()) % gym_office_.size();
    		     l = gym_office_[i];
 	}
 
@@ -256,22 +256,22 @@ void City::Load_map(const char* filename)
             // Arvotaan, mitä tyyppiä rakennukset ovat ( 0 == koti, 1 == toimisto, 2 = vapaa-ajan rakennus )
 	    
 	    // Valitse satunnaisesti, minkälainen polku on kyseessä building_proportionsienin mukaisesti
-	     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    	     std::default_random_engine generator (seed);
+         unsigned seed = static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count());
+             std::default_random_engine generator (seed);
 		
 	     int path_type = -1;
 	     // Normitus auttaa käsittelemään jakaumaa oikein.
-	     double norm = 1;
-	     int counter = 0;
+         double norm = 1;
+         size_t counter = 0;
 
-		while ((path_type < 0 ) || (counter < 2)) {
-			std::bernoulli_distribution distribution(building_proportions[counter] / norm);
-			if (distribution(generator)) {path_type = counter; }
+        while ((path_type < 0 ) || (counter < 2)) {
+            std::bernoulli_distribution distribution(building_proportions[counter] / norm);
+            if (distribution(generator)) {path_type = rand()%3; }  //path_type = static_cast<int>(counter);
 			norm = norm - building_proportions[counter];
-			counter = counter + 1; 
-		}
+            counter = counter + 1;
+        }
 	
-		if (path_type == -1) {path_type = 2;}
+        if (path_type == -1) {path_type = 2;}
 
             Building* building = new Building(id, nd_list, path_type);
             buildings_[id] = building;
@@ -421,10 +421,7 @@ void City::BFS()
 
 ///////////////////////////////////////////////////
 //Tuhotaan city
-City::~City(){
-    // Tuhotaan highlightattu tiepointteri
-    delete road_;
-}
+City::~City(){}
 
 
 
@@ -500,7 +497,7 @@ void City::Dijkstra()
                         path.push_back( index_to_value(path_iter).first->ID() );
                         path_iter = prev[path_iter];
                     }
-                     
+
                     if(path.size() > 7) { 
                         if((source_type == 0) && (dest_type == 1)) { home_office_.push_back(path);}
                         if((source_type == 1) && (dest_type == 0)) { office_home_.push_back(path);}

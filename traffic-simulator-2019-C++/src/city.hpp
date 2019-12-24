@@ -73,25 +73,25 @@ class City {
 
 	//Seuraavat 6 vektoria kuvastaa suunnattuja polkuja eri rakennusten välillä!
         // Tunnus 0
-        std::vector<std::list<long> > home_office_;
+    std::vector<std::list<long> > home_office_ = {};
         
 	// Tunnus 1
-	std::vector<std::list<long> > office_home_;
+    std::vector<std::list<long> > office_home_ = {};
 
 	// Tunnus 2
-        std::vector<std::list<long> > home_gym_;
+    std::vector<std::list<long> > home_gym_ = {};
 
 	// Tunnus 3
-        std::vector<std::list<long> > gym_home_;
+    std::vector<std::list<long> > gym_home_ = {};
 
 	// Tunnus 4
-        std::vector<std::list<long> > office_gym_;
+    std::vector<std::list<long> > office_gym_ = {};
 
 	// Tunnus 5
-        std::vector<std::list<long> > gym_office_;
+    std::vector<std::list<long> > gym_office_ = {};
 
 	// Apulista, joka määrittelee, onko solmu kiinnitetty rakennuksiin
-        std::map<long, Node*> building_nodes_;
+    std::map<long, Node*> building_nodes_ = {};
 
 	// Aktiivisuudet Poisson jakaumalle aikavälinä 10s minuutti, jonka arvo vaihtuu tunneittain 
 	// Esimerkiksi: aamuviideltä keskimäärin 0.3 ihmistä generoidaan 10s aikana

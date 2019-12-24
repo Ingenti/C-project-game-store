@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     driver_count_ = new QLabel(this);
 
     try{
-    QString s = QInputDialog().getText(this, "File", "Which file do you want to open?");
+    QString s = QInputDialog().getText(nullptr, "File", "Which .osm file do you want to open?");
     std::string filename = s.toLocal8Bit().constData();      // Tyyppimuunnos QStringistä std::stringiin
     currentFile_ = filename;
     city_ = new City();
@@ -86,8 +86,8 @@ void MainWindow::createNodes()
         float lon = node.second->Location().second;
         float relative_lat = (city_->Dim()[2] - lat ) / (city_->Dim()[2] - city_->Dim()[0] );
         float relative_lon = 1 - (city_->Dim()[3] - lon ) / (city_->Dim()[3] - city_->Dim()[1] );
-        int x =  (relative_lat * this->size().width());
-        int y =  (relative_lon * this->size().height());
+        int x =  static_cast<int>(relative_lat) * this->size().width();
+        int y =  static_cast<int>(relative_lon) * this->size().height();
         painter.setPen(QPen(Qt::blue, 10));
         painter.drawPoint(x,y);
         painter.setPen(QPen(Qt::green, 2));
@@ -100,8 +100,8 @@ void MainWindow::createRoads()
     QPainter painter(this);
     for (auto road :  city_->Roads())
     {
-        float usage = road->Use_percent();
-        if(round(usage) == 1){painter.setPen(QPen(Qt::darkRed,6));}
+        double usage = static_cast<double>(road->Use_percent());
+        if(usage >= 0.95){painter.setPen(QPen(Qt::darkRed,6));}
         if(0.75 <= usage && usage < 1){painter.setPen(QPen(QColor(0+255,255-255,0),6));}
         if(0.5 <= usage && usage < 0.75){painter.setPen(QPen(QColor(0+255*2/3,255-255*2/3,0),6));}
         if(0.25 <= usage && usage < 0.5){painter.setPen(QPen(QColor(0+255*1/3,255-255*1/3,0),6));}
@@ -116,10 +116,10 @@ void MainWindow::createRoads()
         float rl_source_lon = ( (city_->Dim()[3] - source_lon ) / (city_->Dim()[3] - city_->Dim()[1] ) );
         float rl_dest_lat = (city_->Dim()[2] - dest_lat ) / (city_->Dim()[2] - city_->Dim()[0] );
         float rl_dest_lon = ( (city_->Dim()[3] - dest_lon ) / (city_->Dim()[3] - city_->Dim()[1] ) );
-        int s_y =  rl_source_lat * this->size().height();
-        int s_x =  this->size().width() - (rl_source_lon * this->size().width());
-        int d_y =  rl_dest_lat * this->size().height();
-        int d_x =  this->size().width() - (rl_dest_lon * this->size().width());
+        int s_y =  static_cast<int>((rl_source_lat) * this->size().height());
+        int s_x =  static_cast<int>(this->size().width() - ((rl_source_lon) * this->size().width()));
+        int d_y =  static_cast<int>((rl_dest_lat) * this->size().height());
+        int d_x =  static_cast<int>(this->size().width() - ((rl_dest_lon) * this->size().width()));
         if(road->Side()) { painter.drawLine((QPoint(s_x, s_y)), QPoint(d_x, d_y)); }
         else { painter.drawLine(QPoint(s_x + 15, s_y + 15), QPoint(d_x + 15, d_y + 15)); }
     }
@@ -131,18 +131,18 @@ void MainWindow::createBuildings()
     painter.setBrush((Qt::SolidPattern));
     for(auto b : city_->Buildings())
     {
-        QVector<QPoint> points;
+        QVector<QPointF> points;
         for(auto c : b.second->Corners())
         {
             float lat = city_->Nodes()[c]->Location().first;
             float lon = city_->Nodes()[c]->Location().second;
             float relative_lat = (city_->Dim()[2] - lat ) / (city_->Dim()[2] - city_->Dim()[0] );
             float relative_lon = 1 - (city_->Dim()[3] - lon ) / (city_->Dim()[3] - city_->Dim()[1] );
-            int y =  (relative_lat * this->size().height());
-            int x =  (relative_lon * this->size().width());
-            points.push_front(QPoint(x,y));
+            float y =  ((relative_lat) * this->size().height());
+            float x =  ((relative_lon) * this->size().width());
+            points.push_front(QPointF(static_cast<double>(x),static_cast<double>(y)));
         }
-    if(b.second->Type() == 0) {painter.setBrush(Qt::yellow); } if(b.second->Type() == 1) { painter.setBrush(Qt::black); } if(b.second->Type() == 2) { painter.setBrush(Qt::gray); }
+    if(b.second->Type() == 0) {painter.setBrush(Qt::yellow); } if(b.second->Type() == 1) { painter.setBrush(Qt::magenta); } if(b.second->Type() == 2) { painter.setBrush(Qt::gray); }
         painter.drawPolygon(points, Qt::WindingFill);
     }
 }
@@ -169,7 +169,7 @@ void MainWindow::closeEvent(QCloseEvent *)
 
 void MainWindow::on_actionQuit_triggered()
 {
-    exit(EXIT_SUCCESS);
+    this->close();
 }
 
 void MainWindow::on_File_Option_triggered()
@@ -220,7 +220,7 @@ void MainWindow::on_actionTime_triggered()
 void MainWindow::on_actionHistogram_triggered()
 {
     std::vector<int> mean_drivers;
-    int sum = 0;
+    double sum = 0;
     int k = 0;
     for (auto driver : drivers_)
     {
@@ -229,7 +229,7 @@ void MainWindow::on_actionHistogram_triggered()
         if (k >= 360)           // 10s aikavälein; 360 näytettä tunnissa
         {
             //reset loop, divide by amount of roads in the map
-            mean_drivers.push_back(sum/city_->Visible().size());
+            mean_drivers.push_back(static_cast<int>(sum/city_->Visible().size()));
             sum = 0;
             k = 0;
         }
@@ -241,7 +241,7 @@ void MainWindow::on_actionHistogram_triggered()
 void MainWindow::ask_save()
 {
     QMessageBox::StandardButton answer;
-    answer = QMessageBox::question(nullptr, "Save", "Do you want to save this map?  If so, remember to set this window aside.");
+    answer = QMessageBox::question(nullptr, "Save", "Do you want to save this map?");
     if(answer == QMessageBox::Yes) {save_screen();}
 }
 
@@ -262,7 +262,7 @@ void MainWindow::on_actionChooseRoad_triggered()
     std::string road = s.toLocal8Bit().constData();
     try {
         int road_index = stoi(road) - 1;
-        Road* r = city_->Visible()[road_index];
+        Road* r = city_->Visible()[static_cast<size_t>(road_index)];
         city_->road_ = r;
         QMessageBox mb(this);
         mb.setText("Current traffic for this road: "+ QString::number(r->Total_drivers(), 10));
