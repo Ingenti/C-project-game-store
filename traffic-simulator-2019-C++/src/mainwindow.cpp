@@ -6,18 +6,13 @@
 #include <string>
 #include <math.h>
 #include <QFileDialog>
-#include <QLineF>
 #include <QPainter>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QLabel>
 #include <QColor>
 #include <QTimer>
-#include <QVector>
 #include <QMenuBar>
-#include <QStatusBar>
 #include <QInputDialog>
-#include <QDockWidget>
 #include <QDateTime>
 #include <QMessageBox>
 #include <QPixmap>
@@ -59,8 +54,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
-    driver_count_->setGeometry(this->size().width() -150, 30, 150, 100);
-    dig_clock_->setGeometry(this->size().width()-150,10,100,100);
+    driver_count_->setGeometry(this->size().width()-100,30,100,40);
+    dig_clock_->setGeometry(this->size().width()-100,10,100,40);
     if (flag_ == 1) {t_.singleShot(500, this, SLOT(update()));}
     //createNodes();
     createRoads();
@@ -154,6 +149,9 @@ void MainWindow::kellotus()
     int m = (time_*10/60) - h*60;       //minuutit
     QString text = QString::number(h) + ":" + QString::number(m);
     if (m < 10){text = QString::number(h) + ":0" + QString::number(m);}
+    //dig_clock_->setStyleSheet("QLabel {font : bold;}");       somehow keeps updating the timer (calling paintevent to label?) even if mainwindows paintevent is paused
+    QPainter painter(this);
+    painter.fillRect(this->size().width()-100,0,100,60, QBrush(Qt::white));
     dig_clock_->setText(text);
 }
 
@@ -161,7 +159,7 @@ void MainWindow::kellotus()
 // Overloaded window closing
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    ask_save();
+    //ask_save();
     exit(EXIT_SUCCESS);
 }
 
@@ -179,6 +177,7 @@ void MainWindow::on_File_Option_triggered()
     std::ifstream file(fn);
         if (file)
         {
+            delete city_;
             city_ = new City();
             city_->Load_map(fn.c_str());
             currentFile_ = fn;
@@ -245,6 +244,11 @@ void MainWindow::ask_save()
     if(answer == QMessageBox::Yes) {save_screen();}
 }
 
+void MainWindow::on_actionSave_triggered()
+{
+    save_screen();
+}
+
 void MainWindow::save_screen()
 {
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -262,6 +266,8 @@ void MainWindow::on_actionChooseRoad_triggered()
     std::string road = s.toLocal8Bit().constData();
     try {
         int road_index = stoi(road) - 1;
+        int s = static_cast<int>(city_->Visible().size());
+        if(road_index >= s || road_index < 0) {throw(std::invalid_argument("Too large or negative input. Road index exceeded."));}
         Road* r = city_->Visible()[static_cast<size_t>(road_index)];
         city_->road_ = r;
         QMessageBox mb(this);
@@ -286,15 +292,15 @@ void MainWindow::on_actionChooseRoad_triggered()
         int h = time_*10/3600;
         draw(mean_drivers, h);
 
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument inva) {
         QMessageBox mb(this);
-        mb.critical(nullptr, "Bad input", "Non-numeric or too large input.");
+        mb.critical(nullptr, "Bad input", inva.what());
     }
 }
 
 void MainWindow::draw(std::vector<int> drivers, int h)
 {
-    Dialog dialogNew(drivers,h);
-    dialogNew.setModal(true);
+    Dialog dialogNew(drivers,h, nullptr);
+    dialogNew.setWindowModality(Qt::ApplicationModal);
     dialogNew.exec();
 }

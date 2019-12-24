@@ -37,6 +37,7 @@ private slots:
     void on_actionHistogram_triggered();
     void on_actionTime_triggered();
     void on_actionChooseRoad_triggered();
+    void on_actionSave_triggered();
 
 private:
     int width_ = 1200;

@@ -16,7 +16,7 @@ Road::Road(Node* source, Node* destination, int side, unsigned int max_traffic)
                             std::pow( destination_->Location().second - source_->Location().second, 2) );
     
     // Max_traffic on suhteutettu kartan kokoon
-    max_traffic_ = length_ / 80;
+    max_traffic_ = static_cast<unsigned int>(length_ / 80);
     if (max_traffic_ < 3) {max_traffic_ = 3;}
 
     // Lähtötiet eivät ole varsinaisia kartassa näkyviä teitä, joten niille pitää tehdä oma max_traffic_ määrittely
@@ -88,7 +88,7 @@ void Road::Drive(std::map<Node*, std::list<Road*> > adjacencylist, std::map<long
                 // Etsitään listasta se tie, jonka määränpää on auton seuraava solmu.
                 for(auto i : roads) { if(i->Destination() == next_node) { next_road = i; } }
                 // Yritetään lisätä auto seuraavalle tielle. Jos onnistuu, niin lyhennetään auton reittiä ja poistetaan auto tältä tieltä
-                if( next_road->Arrive_on_road(cars->first) ) { current_traffic_.erase(cars); } 
+                if(next_road->Arrive_on_road(cars->first) ) { current_traffic_.erase(cars); }
             }
         }
     }

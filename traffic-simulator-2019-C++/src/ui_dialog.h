@@ -20,12 +20,18 @@ QT_BEGIN_NAMESPACE
 class Ui_Dialog
 {
 public:
+    QAction *actionQuit;
 
     void setupUi(QDialog *Dialog)
     {
         if (Dialog->objectName().isEmpty())
             Dialog->setObjectName(QString::fromUtf8("Dialog"));
-        Dialog->resize(1300, 900);
+        Dialog->resize(1200, 650);
+
+        actionQuit = new QAction(Dialog);
+        actionQuit->setObjectName(QString::fromUtf8("actionQuit"));
+        actionQuit->setShortcut(QKeySequence("Ctrl+W"));
+
 
         retranslateUi(Dialog);
 
@@ -34,7 +40,8 @@ public:
 
     void retranslateUi(QDialog *Dialog)
     {
-        Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
+        Dialog->setWindowTitle(QApplication::translate("Histogram", "Histogram", nullptr));
+        actionQuit->setText(QApplication::translate("Dialog", "Quit", nullptr));
     } // retranslateUi
 
 };

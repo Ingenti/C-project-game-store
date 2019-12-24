@@ -1,6 +1,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
+#include <QDebug>
 Dialog::Dialog(std::vector<int> data, int h, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog),
@@ -15,27 +16,27 @@ Dialog::~Dialog()
     delete ui;
 }
 
-void Dialog::paintEvent(QPaintEvent *event){
+void Dialog::paintEvent(QPaintEvent *){
     setStyleSheet("background-color: white;");
 
     QPainter painter(this);
 
-    painter.drawLine(50,700,26*50,700);
-    painter.drawLine(50,700,50,50);
+    painter.drawLine(50,600,26*50,600);
+    painter.drawLine(50,600,50,50);
     painter.drawLine(40,60,50,50);
     painter.drawLine(60,60,50,50);
-    painter.drawLine(26*50-10,710,26*50,700);
-    painter.drawLine(26*50-10,690,26*50,700);
+    painter.drawLine(26*50-10,710,26*50,600);
+    painter.drawLine(26*50-10,690,26*50,600);
 
     std::vector<int> v = data_; //ajomaaravektori, tarvitaan koodista
 
 
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 10; i++) {
         QString s = QString::number(i*(20));
-        painter.drawText(23,705-i*60,s);
+        painter.drawText(23,605-i*60,s);
         }
 
-    int lopetusarvo = h_;                                                       //tarvitaan koodista
+    int lopetusarvo = h_;
     int alotusarvo = lopetusarvo;
 
     if(v.size()<24){
@@ -62,7 +63,7 @@ void Dialog::paintEvent(QPaintEvent *event){
     for (std::vector<int>::iterator it = v2.begin(); it != v2.end(); ++it) {
 
         QString s = QString::number(*it);
-        painter.drawText(70+j*50,720,s);
+        painter.drawText(70+j*50,620,s);
         j++;
         }
 
@@ -79,7 +80,7 @@ void Dialog::paintEvent(QPaintEvent *event){
             f--;
         }
         else{
-        QRect rect(j*50,700,50,(-3)*(*it));
+        QRect rect(j*50,600,50,(-3)*(*it));
         QColor color(Qt::green);
 
         //if((*it)<=50) QColor color(Qt::red);
@@ -95,13 +96,18 @@ void Dialog::paintEvent(QPaintEvent *event){
 
 void Dialog::closeEvent(QCloseEvent *)
 {
-    ask_save();
+    //ask_save();
+}
+
+void Dialog::on_actionQuit_triggered()
+{
+    this->close();
 }
 
 void Dialog::ask_save()
 {
     QMessageBox::StandardButton answer;
-    answer = QMessageBox::question(nullptr, "Save", "Do you want to save this histogram? If so, remember to set this window aside.");
+    answer = QMessageBox::question(nullptr, "Save", "Do you want to save this histogram?");
     if(answer == QMessageBox::Yes) {save_screen();}
 }
 

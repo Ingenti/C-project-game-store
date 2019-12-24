@@ -24,6 +24,9 @@ public:
     void save_screen();
     void closeEvent(QCloseEvent* e);
 
+private slots:
+    void on_actionQuit_triggered();
+
 private:
     Ui::Dialog *ui;
     std::vector<int> data_;

@@ -23,6 +23,7 @@ public:
     QAction *actionHistogram;
     QAction *actionTime;
     QAction *actionChooseRoad;
+    QAction *actionSave;
     QWidget *centralwidget;
     QMenuBar *menubar;
     QMenu *menuAction;
@@ -32,6 +33,7 @@ public:
     QMenu *histogram_menu;
     QMenu *time_menu;
     QMenu *road_menu;
+    QMenu *save_menu;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -67,6 +69,9 @@ public:
         actionChooseRoad = new QAction(MainWindow);
         actionChooseRoad->setObjectName(QString::fromUtf8("actionChooseRoad"));
 
+        actionSave = new QAction(MainWindow);
+        actionSave->setObjectName(QString::fromUtf8("actionSave"));
+
 
         // Add menubar to the top of the window
 
@@ -90,12 +95,11 @@ public:
         time_menu->setObjectName(QString::fromUtf8("time_menu"));
         road_menu = new QMenu(menubar);
         road_menu->setObjectName(QString::fromUtf8("road_menu"));
+        save_menu = new QMenu(menubar);
+        save_menu->setObjectName(QString::fromUtf8("save_menu"));
 
-
-        // Set menubar visible and add statusbar
+        // Set menubar visible
         MainWindow->setMenuBar(menubar);
-        statusbar = new QStatusBar(MainWindow);
-        statusbar->setObjectName(QString::fromUtf8("statusbar"));
         MainWindow->setStatusBar(statusbar);
 
         // Actions to menubar
@@ -106,6 +110,7 @@ public:
         menubar->addAction(histogram_menu->menuAction());
         menubar->addAction(time_menu->menuAction());
         menubar->addAction(road_menu->menuAction());
+        menubar->addAction(save_menu->menuAction());
 
 
         // Actions for submenus
@@ -115,6 +120,7 @@ public:
         menuAction->addAction(actionHistogram);
         menuAction->addAction(actionTime);
         menuAction->addAction(actionChooseRoad);
+        menuAction->addAction(actionSave);
         menuExit->addAction(actionQuit);
 
         retranslateUi(MainWindow);
@@ -132,6 +138,7 @@ public:
         actionHistogram->setText(QApplication::translate("MainWindow", "Histogram", nullptr));
         actionTime->setText(QApplication::translate("MainWindow", "Set time", nullptr));
         actionChooseRoad->setText(QApplication::translate("MainWindow", "Choose Road", nullptr));
+        actionSave->setText(QApplication::translate("MainWindow", "Save as png..", nullptr));
         menuAction->setTitle(QApplication::translate("MainWindow", "File", nullptr));
         menuExit->setTitle(QApplication::translate("MainWindow", "Exit", nullptr));
 
